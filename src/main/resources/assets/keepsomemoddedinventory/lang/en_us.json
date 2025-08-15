@@ -1,0 +1,7 @@
+{
+  "keepsomemoddedinventory.configuration.modEnabled": "Mod enabled",
+  "keepsomemoddedinventory.configuration.keepEnchantable": "Keep enchantable items",
+  "keepsomemoddedinventory.configuration.keepDamageable": "Keep damageable items",
+  "keepsomemoddedinventory.configuration.itemVelocityMultiplier": "Item velocity multiplier",
+  "keepsomemoddedinventory.configuration.experienceDropped": "% of experience"
+}

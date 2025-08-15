@@ -1,0 +1,20 @@
+{
+  "values": [
+    "#axes",
+    "#pickaxes",
+    "#swords",
+    "#shovels",
+    "#hoes",
+    "#head_armor",
+    "#leg_armor",
+    "#chest_armor",
+    "#foot_armor",
+    "#compasses",
+    "clock",
+
+    {
+      "id": "#keepsomemoddedinventory:never_drop/create",
+      "required": false
+    }
+  ]
+}
