@@ -1,56 +1,47 @@
 package dev.mageowl.keepsomemoddedinventory;
 
 
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
 import java.util.Collection;
-import java.util.Objects;
 
 public class DeathEvents {
-    private DeathSavedData savedData;
-
     @SubscribeEvent
-    public void onEntityDeath(LivingDeathEvent event) {
+    public static void onEntityDeath(LivingDeathEvent event) {
         if (!Config.modEnabled) return;
 
         if (event.getEntity() instanceof ServerPlayer player) {
-            savedData.put(player.getUUID(), new DeathInventory(player));
+            player.setData(KeepSomeModdedInventory.DEATH_INVENTORY, new DeathInventory(player));
         }
     }
 
-    @SubscribeEvent
-    public void onEntityDropItems(LivingDropsEvent event) {
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onEntityDropItems(LivingDropsEvent event) {
         if (!Config.modEnabled) return;
 
         if (event.getEntity() instanceof ServerPlayer player) {
-            DeathInventory inventory = savedData.get(player.getUUID());
-            if (inventory == null) return;
+            DeathInventory inventory = player.getData(KeepSomeModdedInventory.DEATH_INVENTORY);
 
             Collection<ItemEntity> drops = event.getDrops();
             drops.removeIf((drop) -> {
                 ItemStack item = drop.getItem();
 
-                if (shouldDrop(item)) {
+                if (KeepSomeModdedInventory.shouldDrop(item, event.getEntity().level())) {
                     inventory.remove(item);
                     drop.setDeltaMovement(
-                            drop.getDeltaMovement()
-                                    .multiply(
-                                            Config.itemVelocityMultiplier,
-                                            1,
-                                            Config.itemVelocityMultiplier)
+                            drop.getDeltaMovement().multiply(
+                                    Config.itemVelocityMultiplier,
+                                    1,
+                                    Config.itemVelocityMultiplier
+                            )
                     );
                     drop.setUnlimitedLifetime();
                     return false;
@@ -60,7 +51,7 @@ public class DeathEvents {
     }
 
     @SubscribeEvent
-    public void onEntityDropExperience(LivingExperienceDropEvent event) {
+    public static void onEntityDropExperience(LivingExperienceDropEvent event) {
         if (!Config.modEnabled) return;
         if (Config.experienceDropped == 0) return;
 
@@ -85,7 +76,7 @@ public class DeathEvents {
     }
 
     @SubscribeEvent
-    public void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (!Config.modEnabled) return;
 
         if (event.getEntity() instanceof ServerPlayer player) {
@@ -94,29 +85,10 @@ public class DeathEvents {
                 player.setExperiencePoints(0);
             }
 
-            DeathInventory inventory = savedData.remove(player.getUUID());
+            DeathInventory inventory = player.removeData(KeepSomeModdedInventory.DEATH_INVENTORY);
             if (inventory == null) return;
 
             inventory.restore(player);
         }
-    }
-
-    private boolean shouldDrop(ItemStack item) {
-
-        if (item.is(KeepSomeModdedInventory.TAG_ALWAYS_DROP)) return true;
-        if (item.is(KeepSomeModdedInventory.TAG_NEVER_DROP)) return false;
-
-        if (item.isEnchantable()) return false;
-        if (item.has(DataComponents.MAX_DAMAGE)) return false;
-
-        return true;
-    }
-
-    @SubscribeEvent
-    public void onJoinWorld(ServerStartingEvent event) {
-        ServerLevel level = Objects.requireNonNull(event.getServer()
-                .getLevel(Level.OVERWORLD));
-        DimensionDataStorage dataStorage = level.getDataStorage();
-        savedData = dataStorage.computeIfAbsent(new SavedData.Factory<>(DeathSavedData::create, DeathSavedData::load), KeepSomeModdedInventory.MODID);
     }
 }

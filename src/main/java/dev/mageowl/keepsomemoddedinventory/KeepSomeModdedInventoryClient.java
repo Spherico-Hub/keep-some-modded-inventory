@@ -6,7 +6,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-@Mod(value = KeepSomeModdedInventory.MODID, dist = Dist.CLIENT)
+@Mod(value = KeepSomeModdedInventory.ID, dist = Dist.CLIENT)
 public class KeepSomeModdedInventoryClient {
 
     public KeepSomeModdedInventoryClient(ModContainer modContainer) {
