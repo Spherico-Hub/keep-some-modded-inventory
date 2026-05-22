@@ -11,9 +11,14 @@
     "#foot_armor",
     "#compasses",
     "clock",
+    "spyglass"
 
     {
       "id": "#keepsomemoddedinventory:never_drop/create",
+      "required": false
+    },
+    {
+      "id": "#keepsomemoddedinventory:never_drop/create_aeronautics",
       "required": false
     }
   ]
